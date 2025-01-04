@@ -1,0 +1,110 @@
+﻿@page "/createnewaccount"
+<head>
+    <link rel="stylesheet" href="css/createnewaccount.css" />
+</head>
+
+<h3>Create New Account</h3>
+
+<EditForm Model="newAccountModel" OnValidSubmit="HandleCreateAccount">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div>
+        <label>Username:</label>
+        <InputText @bind-Value="newAccountModel.Name" />
+    </div>
+    <div>
+        <label>Password:</label>
+        <InputText @bind-Value="newAccountModel.Password" type="password" />
+    </div>
+    <div>
+        <label>Contact:</label>
+        <InputText @bind-Value="newAccountModel.Contact" type="text" />
+    </div>
+
+    <!-- Image upload field -->
+    <div>
+        <label>Profile Image:</label>
+        <InputFile OnChange="HandleFileSelected" />
+    </div>
+
+    <button type="submit">Create Account</button>
+</EditForm>
+
+@if (!string.IsNullOrEmpty(ResultMessage))
+{
+    <div>@ResultMessage</div>
+}
+
+@code {
+    private string ResultMessage { get; set; } = string.Empty;
+    private byte[] UploadedImage { get; set; }
+
+    [Inject]
+    public DatabaseService DatabaseService { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }  // Inject NavigationManager
+
+    private NewAccountModel newAccountModel = new NewAccountModel();
+
+    // Handle image file selection
+    private async Task HandleFileSelected(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        if (file != null)
+        {
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+            UploadedImage = buffer;  // Store the image data as a byte array
+        }
+    }
+
+    private async Task HandleCreateAccount()
+    {
+        // Check if username or password is empty
+        if (string.IsNullOrEmpty(newAccountModel.Name) || string.IsNullOrEmpty(newAccountModel.Password))
+        {
+            ResultMessage = "Please fill in both the username and password.";
+            return;
+        }
+
+        // Check if the username already exists in the database
+        var existingUser = DatabaseService.GetItems().FirstOrDefault(u => u.Name == newAccountModel.Name);
+        if (existingUser != null)
+        {
+            ResultMessage = "Username already exists. Please choose another one.";
+            return;
+        }
+
+        // Create new account model (assume MyModel corresponds to the user model)
+        var newAccount = new MyModel
+            {
+                Name = newAccountModel.Name,
+                Password = newAccountModel.Password,  // Note: It's recommended to hash the password before storing it
+                Contact = newAccountModel.Contact,
+                Image = UploadedImage != null ? Convert.ToBase64String(UploadedImage) : null  // Store the image as Base64 string or in a separate file depending on your needs
+            };
+
+        // Save the new account to the database using SaveItem
+        var result = DatabaseService.SaveItem(newAccount);
+
+        if (result > 0)  // If the insert was successful (assuming SaveItem returns a positive number on success)
+        {
+            ResultMessage = "Account created successfully!";
+            // Optionally redirect to login page or home page
+            NavigationManager.NavigateTo("/login");  // Replace with your desired page
+        }
+        else
+        {
+            ResultMessage = "An error occurred while creating the account. Please try again.";
+        }
+    }
+
+    public class NewAccountModel
+    {
+        public string Name { get; set; }
+        public string Password { get; set; }
+        public string Contact { get; set; }
+    }
+}

@@ -1,0 +1,78 @@
+﻿@page "/"
+<head>
+    <link rel="stylesheet" href="css/login.css" />
+</head>
+
+<div class="login-container">
+    <h3>Login</h3>
+
+    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div>
+            <label>Name:</label>
+            <InputText @bind-Value="loginModel.Name" />
+        </div>
+        <div>
+            <label>Password:</label>
+            <InputText @bind-Value="loginModel.Password" type="password" />
+        </div>
+        <button type="submit">Login</button>
+    </EditForm>
+
+    <NavLink class="create-account" href="createnewaccount">Create New Account</NavLink>
+
+    @if (!string.IsNullOrEmpty(ResultMessage))
+    {
+        <div class="result-message">@ResultMessage</div>
+    }
+</div>
+
+@code {
+    private string ResultMessage { get; set; } = string.Empty;
+
+    [Inject]
+    public DatabaseService DatabaseService { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+
+    [Inject]
+    public Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }  // Inject LocalStorage service
+
+    private LoginModel loginModel = new LoginModel();
+
+    private async Task HandleLogin()
+    {
+        if (string.IsNullOrEmpty(loginModel.Name) || string.IsNullOrEmpty(loginModel.Password))
+        {
+            ResultMessage = "Please fill in all fields.";
+            return;
+        }
+
+        var users = DatabaseService.GetItems();
+        var user = users.FirstOrDefault(u => u.Name == loginModel.Name && u.Password == loginModel.Password);
+
+        if (user != null)
+        {
+            // Store session data in LocalStorage
+            await LocalStorage.SetItemAsync("username", user.Name); // Save the username to LocalStorage
+            await LocalStorage.SetItemAsync("userContact", user.Contact); // Save contact info
+            await LocalStorage.SetItemAsync("userImage", user.Image); // Save image path or data
+
+            ResultMessage = "Login successful!";
+            NavigationManager.NavigateTo("/dashboard");
+        }
+        else
+        {
+            ResultMessage = "Incorrect name or password.";
+        }
+    }
+
+    public class LoginModel
+    {
+        public string Name { get; set; }
+        public string Password { get; set; }
+    }
+}

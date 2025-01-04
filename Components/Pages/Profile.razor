@@ -1,0 +1,78 @@
+﻿@page "/profile"
+<head>
+    <link rel="stylesheet" href="css/profile.css" />
+</head>
+
+<h3>Profile</h3>
+
+@if (isLoading)
+{
+    <p>Loading...</p>
+}
+else if (string.IsNullOrEmpty(name))
+{
+    <p>You are not logged in. Please <NavLink href="/login">login</NavLink>.</p>
+}
+else
+{
+    <div>
+        <p><strong>Name:</strong> @name</p>
+        <p><strong>Contact:</strong> @contact</p>
+        @if (!string.IsNullOrEmpty(image))
+        {
+            <img src="data:image/jpeg;base64,@image" alt="Profile Image" style="max-width: 150px; max-height: 150px;" />
+        }
+    </div>
+    <button @onclick="HandleLogout">Logout</button>
+}
+
+@code {
+    private string name;
+    private string contact;
+    private string image;
+    private bool isLoading = true;
+
+    [Inject]
+    public Blazored.LocalStorage.ILocalStorageService LocalStorage { get; set; }
+
+    [Inject]
+    public DatabaseService DatabaseService { get; set; }
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Retrieve the unique identifier of the logged-in user from LocalStorage
+        var loggedInUserName = await LocalStorage.GetItemAsync<string>("username");
+
+        if (string.IsNullOrEmpty(loggedInUserName))
+        {
+            // Redirect to login if no session exists
+            NavigationManager.NavigateTo("/login");
+            return;
+        }
+
+        // Fetch user details from the database
+        var users = DatabaseService.GetItems(); // Returns a list of users
+        var user = users.FirstOrDefault(u => u.Name == loggedInUserName);
+
+        if (user != null)
+        {
+            name = user.Name;
+            contact = user.Contact;
+            image = user.Image;
+        }
+
+        isLoading = false;
+    }
+
+    private async Task HandleLogout()
+    {
+        // Clear session data from LocalStorage
+        await LocalStorage.RemoveItemAsync("Name");
+
+        // Redirect to login page
+        NavigationManager.NavigateTo("/login");
+    }
+}
