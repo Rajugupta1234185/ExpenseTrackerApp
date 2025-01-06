@@ -1,0 +1,94 @@
+﻿@page "/add-transaction"
+@inject NavigationManager NavigationManager
+@inject DatabaseService DatabaseService
+
+<head>
+    <link rel="stylesheet" href="css/transactions.css" />
+</head>
+
+<div class="container">
+    <nav class="sidebar">
+        <p style="text-align: center; font-weight: bold; background-color: #ffa500; color: #ffffff; padding: 20px; border-radius: 5px;">
+            Expense Tracker
+        </p>
+        <NavLink class="nav-item" href="/profile">Your Profile</NavLink>
+        <NavLink class="nav-item" href="/dashboard">Dashboard</NavLink>
+        <NavLink class="nav-item" href="/transactions">Transactions</NavLink>
+        <NavLink class="nav-item" href="/debts">Debts</NavLink>
+        <NavLink class="nav-item" href="/add-transaction">Add Transaction</NavLink>
+        <button class="logout-button" @onclick="Logout">Logout</button>
+    </nav>
+
+    <main class="main-content" style="align-content:center; margin-left:20%">
+        <div class="transaction-container">
+            <!-- Add New Transaction Form -->
+            <div class="form-container">
+                <h2>Add New Transaction</h2>
+                <label for="date">Date:</label>
+                <input type="date" id="date" @bind="NewTransaction.Date" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
+
+                <label for="type">Type:</label>
+                <select id="type" @bind="NewTransaction.Type">
+                    <option value="Debit">Debit</option>
+                    <option value="Credit">Credit</option>
+                    <option value="Debt">Debt</option>
+                </select>
+
+                <label for="amount">Amount:</label>
+                <input type="number" id="amount" @bind="NewTransaction.Amount" />
+
+                <label for="notes">Notes: </label>
+                <input type="text" id="notes" @bind="NewTransaction.Notes"/>
+
+
+                <label for="tags">Tags:</label>
+                <input type="text" id="tags" @bind="NewTransaction.Tags" />
+
+                <button @onclick="AddNewTransaction">Add Transaction</button>
+            </div>
+        </div>
+    </main>
+</div>
+
+@code {
+    private Transaction NewTransaction { get; set; } = new Transaction();
+
+    private void AddNewTransaction()
+    {
+        // Set the Date to the current date if not already set
+        if (NewTransaction.Date == default)
+        {
+            NewTransaction.Date = DateTime.Now;  // Assign the current date and time
+        }
+
+        // Validate transaction fields
+        if (NewTransaction.Amount <= 0)
+        {
+            // Show an error message (you could use a notification or alert here)
+            return;
+        }
+
+        try
+        {
+            // Save to the database
+            DatabaseService.SaveTransaction(NewTransaction);
+
+            // Clear the form after adding
+            NewTransaction = new Transaction();
+
+            // Navigate back to the transactions page
+            NavigationManager.NavigateTo("/transactions");
+        }
+        catch (Exception ex)
+        {
+            // Handle the error (you can show an error message or log it)
+            Console.WriteLine($"Error adding transaction: {ex.Message}");
+        }
+    }
+
+    private void Logout()
+    {
+        // Perform logout logic here
+        NavigationManager.NavigateTo("/login");
+    }
+}

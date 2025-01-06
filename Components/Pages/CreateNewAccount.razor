@@ -56,7 +56,7 @@
         {
             var buffer = new byte[file.Size];
             await file.OpenReadStream().ReadAsync(buffer);
-            UploadedImage = buffer;  // Store the image data as a byte array
+            UploadedImage = buffer;  // Storimg the image data as a byte array
         }
     }
 
@@ -81,9 +81,9 @@
         var newAccount = new MyModel
             {
                 Name = newAccountModel.Name,
-                Password = newAccountModel.Password,  // Note: It's recommended to hash the password before storing it
+                Password = newAccountModel.Password,  
                 Contact = newAccountModel.Contact,
-                Image = UploadedImage != null ? Convert.ToBase64String(UploadedImage) : null  // Store the image as Base64 string or in a separate file depending on your needs
+                Image = UploadedImage != null ? Convert.ToBase64String(UploadedImage) : null  
             };
 
         // Save the new account to the database using SaveItem

@@ -3,7 +3,6 @@
     <link rel="stylesheet" href="css/Home.css" />
 </head>
 <div class="container">
-
     <nav class="sidebar">
         <p style="text-align: center; font-weight: bold; background-color: #ffa500; color: #ffffff; padding: 20px; border-radius: 5px;">
             Expense Tracker
@@ -12,12 +11,21 @@
         <NavLink class="nav-item" href="/dashboard">Dashboard</NavLink>
         <NavLink class="nav-item" href="/transactions">Transactions</NavLink>
         <NavLink class="nav-item" href="/debts">Debts</NavLink>
+        <NavLink class="nav-item" href="/add-transaction">Add Transaction</NavLink>
         <button class="logout-button" @onclick="Logout">Logout</button>
     </nav>
 
     <main class="main-content">
         <h1>Welcome to Expense Tracker!</h1>
-        <p>Track your expenses, manage debts, and stay on top of your finances.</p>
+        
+            <h2>Dashboard</h2>
+            <div class="stats">
+                <div class="stat-box">Total Inflows: $1200</div>
+                <div class="stat-box">Total Outflows: $800</div>
+                <div class="stat-box">Pending Debts: $400</div>
+            </div>
+        
+
     </main>
 </div>
 

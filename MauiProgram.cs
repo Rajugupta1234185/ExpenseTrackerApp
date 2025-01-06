@@ -16,6 +16,7 @@ namespace ExpenseTrackerApp
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
+            //for webview services
 
             builder.Services.AddMauiBlazorWebView();
 
@@ -27,9 +28,9 @@ namespace ExpenseTrackerApp
             // Configure DatabaseService
             string dbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "MyDatabase1.db");
 
-            builder.Services.AddSingleton(new DatabaseService(dbPath));
+            builder.Services.AddSingleton(new DatabaseService(dbPath));          // Path for MyDatabas1.db
 
-            builder.Services.AddBlazoredLocalStorage();  // Add LocalStorage support
+            builder.Services.AddBlazoredLocalStorage();  // Local bazor for session
            
 
 

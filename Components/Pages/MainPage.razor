@@ -1,6 +1,9 @@
 ﻿@inject NavigationManager Navigation
 
+
 @code {
+    //Just a page for initialise loginpage as first page of app
+
     protected override void OnInitialized()
     {
         Navigation.NavigateTo("/login", forceLoad: true);

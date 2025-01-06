@@ -1,6 +1,69 @@
 ﻿@page "/transactions"
-<h3>Transactions</h3>
+@inject NavigationManager NavigationManager
+@inject DatabaseService DatabaseService
+
+<head>
+    <link rel="stylesheet" href="css/transactions.css" />
+</head>
+
+<div class="container">
+    <nav class="sidebar">
+        <p style="text-align: center; font-weight: bold; background-color: #ffa500; color: #ffffff; padding: 20px; border-radius: 5px;">
+            Expense Tracker
+        </p>
+        <NavLink class="nav-item" href="/profile">Your Profile</NavLink>
+        <NavLink class="nav-item" href="/dashboard">Dashboard</NavLink>
+        <NavLink class="nav-item" href="/transactions">Transactions</NavLink>
+        <NavLink class="nav-item" href="/debts">Debts</NavLink>
+        <NavLink class="nav-item" href="/add-transaction">Add Transaction</NavLink>
+        <button class="logout-button" @onclick="Logout">Logout</button>
+    </nav>
+
+    <main class="main-content" style="width:100%; margin-left:5%;">
+        <div class="transaction-container">
+            <!-- Link to Add New Transaction -->
+            <p style="font-weight:bold; text-size-adjust:auto;">Transaction History:</p>
+
+            <!-- Recent Transactions Table -->
+            <table class="transaction-table" style="width:100%;">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Notes</th>
+                        <th>Tags</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var transaction in RecentTransactions)
+                    {
+                            <tr>
+                                <td>@transaction.Date.ToShortDateString()</td>
+                                <td>@transaction.Type</td>
+                                <td>@transaction.Amount</td>
+                                <td>@transaction.Notes</td>
+                                <td>@transaction.Tags</td>
+                            </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
 
 @code {
+    private List<Transaction> RecentTransactions { get; set; } = new List<Transaction>();
 
+    protected override async Task OnInitializedAsync()
+    {
+        // Load transactions from the database
+        RecentTransactions = DatabaseService.GetTransactions();
+    }
+
+    private void Logout()
+    {
+        // Perform logout logic here
+        NavigationManager.NavigateTo("/login");
+    }
 }

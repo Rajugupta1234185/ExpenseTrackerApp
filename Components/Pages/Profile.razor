@@ -1,30 +1,121 @@
 ﻿@page "/profile"
 <head>
-    <link rel="stylesheet" href="css/profile.css" />
+    <link rel="stylesheet" href="css/Home.css" />
+    <style>
+     
+
+        .main-content {
+            margin-left: 0px;
+            width: calc(100% - 260px);
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .profile-container {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #ffffff;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 400px;
+            width: 100%;
+        }
+
+            .profile-container img {
+                border-radius: 50%;
+                max-width: 150px;
+                max-height: 150px;
+                margin-bottom: 20px;
+            }
+
+            .profile-container p {
+                font-size: 16px;
+                margin: 10px 0;
+            }
+
+        .logout-button {
+            background-color: #ff6347;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+
+            .logout-button:hover {
+                background-color: #e55347;
+            }
+
+        .sidebar .nav-item {
+            display: block;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            font-size: 18px;
+        }
+
+            .sidebar .nav-item:hover {
+                background-color: #575757;
+            }
+
+        .sidebar .logout-button {
+            background-color: #e55347;
+            color: white;
+            padding: 10px;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 
-<h3>Profile</h3>
+<div class="container">
+    <nav class="sidebar">
+        <p style="text-align: center; font-weight: bold; background-color: #ffa500; color: #ffffff; padding: 20px; border-radius: 5px;">
+            Expense Tracker
+        </p>
+        <NavLink class="nav-item" href="/profile">Your Profile</NavLink>
+        <NavLink class="nav-item" href="/dashboard">Dashboard</NavLink>
+        <NavLink class="nav-item" href="/transactions">Transactions</NavLink>
+        <NavLink class="nav-item" href="/debts">Debts</NavLink>
+        <NavLink class="nav-item" href="/add-transaction">Add Transaction</NavLink>
+        <button class="logout-button" @onclick="HandleLogout">Logout</button>
+    </nav>
 
-@if (isLoading)
-{
-    <p>Loading...</p>
-}
-else if (string.IsNullOrEmpty(name))
-{
-    <p>You are not logged in. Please <NavLink href="/login">login</NavLink>.</p>
-}
-else
-{
-    <div>
-        <p><strong>Name:</strong> @name</p>
-        <p><strong>Contact:</strong> @contact</p>
-        @if (!string.IsNullOrEmpty(image))
+    <main class="main-content">
+        @if (isLoading)
         {
-            <img src="data:image/jpeg;base64,@image" alt="Profile Image" style="max-width: 150px; max-height: 150px;" />
+            <p>Loading...</p>
         }
-    </div>
-    <button @onclick="HandleLogout">Logout</button>
-}
+        else if (string.IsNullOrEmpty(name))
+        {
+            <p>You are not logged in. Please <NavLink href="/login">login</NavLink>.</p>
+        }
+        else
+        {
+            <div class="profile-container">
+                <h2>Profile</h2>
+                <p><strong>Name:</strong> @name</p>
+                <p><strong>Contact:</strong> @contact</p>
+
+                @if (!string.IsNullOrEmpty(image))
+                {
+                    <img src="data:image/jpeg;base64,@image" alt="Profile Image" />
+                }
+                <button class="logout-button" @onclick="HandleLogout">Logout</button>
+            </div>
+        }
+    </main>
+</div>
 
 @code {
     private string name;
@@ -43,18 +134,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        // Retrieve the unique identifier of the logged-in user from LocalStorage
         var loggedInUserName = await LocalStorage.GetItemAsync<string>("username");
 
         if (string.IsNullOrEmpty(loggedInUserName))
         {
-            // Redirect to login if no session exists
             NavigationManager.NavigateTo("/login");
             return;
         }
 
-        // Fetch user details from the database
-        var users = DatabaseService.GetItems(); // Returns a list of users
+        var users = DatabaseService.GetItems();
         var user = users.FirstOrDefault(u => u.Name == loggedInUserName);
 
         if (user != null)
@@ -69,10 +157,7 @@ else
 
     private async Task HandleLogout()
     {
-        // Clear session data from LocalStorage
-        await LocalStorage.RemoveItemAsync("Name");
-
-        // Redirect to login page
+        await LocalStorage.RemoveItemAsync("username");
         NavigationManager.NavigateTo("/login");
     }
 }
